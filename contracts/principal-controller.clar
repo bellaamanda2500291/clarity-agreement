@@ -56,7 +56,7 @@
     (
       (caller tx-sender)
       (new-id (+ (var-get principal-counter) u1))
-      (current-height block-height)
+      (current-height stacks-block-height)
     )
     (asserts! (is-none (map-get? principal-lookup { principal-address: caller })) ERR_PRINCIPAL_ALREADY_EXISTS)
     (map-set principals
@@ -95,7 +95,7 @@
     ;; Update principal data
     (map-set principals
       { principal-id: principal-id }
-      (merge principal-data { principal-address: new-principal, updated-at: block-height })
+      (merge principal-data { principal-address: new-principal, updated-at: stacks-block-height })
     )
     ;; Set new lookup
     (map-set principal-lookup
@@ -107,19 +107,19 @@
 )
 
 ;; Delegate permissions to another principal
-(define-public (delegate-permissions (delegatee principal) (can-make-decisions bool) (can-transfer-control bool) (expires-at (optional uint)))
+(define-public (delegate-permissions (delegatee principal) (can-decide bool) (can-transfer bool) (expires-at (optional uint)))
   (let
     (
       (caller tx-sender)
-      (current-height block-height)
+      (current-height stacks-block-height)
     )
     (asserts! (not (is-eq caller delegatee)) ERR_TRANSFER_TO_SELF)
     (asserts! (is-registered-principal caller) ERR_UNAUTHORIZED)
     (map-set delegated-permissions
       { delegator: caller, delegatee: delegatee }
       {
-        can-make-decisions: can-make-decisions,
-        can-transfer-control: can-transfer-control,
+        can-make-decisions: can-decide,
+        can-transfer-control: can-transfer,
         expires-at: expires-at,
         created-at: current-height
       }
@@ -150,7 +150,7 @@
     (asserts! (is-eq caller (get principal-address principal-data)) ERR_UNAUTHORIZED)
     (map-set principals
       { principal-id: principal-id }
-      (merge principal-data { is-active: false, updated-at: block-height })
+      (merge principal-data { is-active: false, updated-at: stacks-block-height })
     )
     (ok true)
   )
@@ -171,7 +171,7 @@
       delegation (and
                   (get can-make-decisions delegation)
                   (match (get expires-at delegation)
-                    expiry (< block-height expiry)
+                    expiry (< stacks-block-height expiry)
                     true
                   )
                 )
@@ -188,7 +188,7 @@
       delegation (and
                   (get can-transfer-control delegation)
                   (match (get expires-at delegation)
-                    expiry (< block-height expiry)
+                    expiry (< stacks-block-height expiry)
                     true
                   )
                 )
