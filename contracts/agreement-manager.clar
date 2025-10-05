@@ -48,7 +48,7 @@
   (let
     (
       (new-id (+ (var-get agreement-counter) u1))
-      (current-height block-height)
+      (current-height stacks-block-height)
     )
     (asserts! (not (is-eq party-a party-b)) ERR_INVALID_PARTY)
     (map-set agreements
@@ -84,11 +84,11 @@
     (if (is-eq caller (get party-a agreement))
       (map-set agreements
         { agreement-id: agreement-id }
-        (merge agreement { party-a-decision: (some decision), updated-at: block-height })
+        (merge agreement { party-a-decision: (some decision), updated-at: stacks-block-height })
       )
       (map-set agreements
         { agreement-id: agreement-id }
-        (merge agreement { party-b-decision: (some decision), updated-at: block-height })
+        (merge agreement { party-b-decision: (some decision), updated-at: stacks-block-height })
       )
     )
     (ok true)
@@ -107,7 +107,7 @@
     
     (map-set agreements
       { agreement-id: agreement-id }
-      (merge agreement { is-finalized: true, updated-at: block-height })
+      (merge agreement { is-finalized: true, updated-at: stacks-block-height })
     )
     (ok true)
   )
